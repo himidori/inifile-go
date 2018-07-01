@@ -83,7 +83,7 @@ func (ini *Ini) sectionExists(name string) (int64, error) {
 		offset += len(line)
 
 		if err == io.EOF {
-			return -1, ErrSectionNotExists
+			return -1, nil
 		}
 
 		if strings.TrimSpace(line) == fmt.Sprintf("[%s]", name) {
@@ -124,7 +124,7 @@ func (ini *Ini) AddSection(name string) error {
 
 func (ini *Ini) WriteKey(section string, key string, value string) error {
 	offset, err := ini.sectionExists(section)
-	if err != ErrSectionNotExists {
+	if err != nil {
 		return err
 	}
 
@@ -179,13 +179,15 @@ func (ini *Ini) WriteKey(section string, key string, value string) error {
 				return err
 			}
 
-			if currLine == "\n" && !inserted {
+			if currLine == "\n" || err == io.EOF && !inserted {
+				fmt.Println("works")
 				out = append(out, fmt.Sprintf("%s = %s\n", key, value))
 				inserted = true
 			}
 
 			if err == io.EOF {
 				str := join(out)
+				fmt.Println(str)
 
 				_, err := file.WriteAt([]byte(str), offset)
 				if err != nil {
@@ -217,6 +219,11 @@ func (ini *Ini) ReadKey(section string, key string) (string, error) {
 		return "", err
 	}
 	defer file.Close()
+
+	_, err = file.Seek(offset, os.SEEK_SET)
+	if err != nil {
+		return "", err
+	}
 
 	s, err := file.Stat()
 	if err != nil {
