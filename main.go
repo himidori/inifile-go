@@ -180,14 +180,12 @@ func (ini *Ini) WriteKey(section string, key string, value string) error {
 			}
 
 			if currLine == "\n" || err == io.EOF && !inserted {
-				fmt.Println("works")
 				out = append(out, fmt.Sprintf("%s = %s\n", key, value))
 				inserted = true
 			}
 
 			if err == io.EOF {
 				str := join(out)
-				fmt.Println(str)
 
 				_, err := file.WriteAt([]byte(str), offset)
 				if err != nil {
