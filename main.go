@@ -67,7 +67,10 @@ func (ini *Ini) sectionExists(name string) (int64, error) {
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, s.Size()))
-	io.Copy(buf, file)
+	_, err = io.Copy(buf, file)
+	if err != nil {
+		return -1, err
+	}
 
 	offset := 0
 
@@ -167,7 +170,7 @@ func (ini *Ini) WriteKey(section string, key string, value string) error {
 		lines := bytes.NewBuffer(make([]byte, 0, s.Size()))
 		_, err = io.Copy(lines, file)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		for {
@@ -182,10 +185,7 @@ func (ini *Ini) WriteKey(section string, key string, value string) error {
 			}
 
 			if err == io.EOF {
-				str := ""
-				for _, l := range out {
-					str += l
-				}
+				str := join(out)
 
 				_, err := file.WriteAt([]byte(str), offset)
 				if err != nil {
@@ -224,7 +224,10 @@ func (ini *Ini) ReadKey(section string, key string) (string, error) {
 	}
 
 	buf := bytes.NewBuffer(make([]byte, 0, s.Size()))
-	io.Copy(buf, file)
+	_, err = io.Copy(buf, file)
+	if err != nil {
+		return "", err
+	}
 
 	for {
 		line, err := buf.ReadString('\n')
@@ -271,7 +274,10 @@ func (ini *Ini) DeleteKey(section string, key string) error {
 
 	size := s.Size()
 	buf := bytes.NewBuffer(make([]byte, 0, size))
-	io.Copy(buf, file)
+	_, err = io.Copy(buf, file)
+	if err != nil {
+		return err
+	}
 
 	out := []string{}
 	found := false
