@@ -124,7 +124,7 @@ func (ini *Ini) AddSection(name string) error {
 
 func (ini *Ini) WriteKey(section string, key string, value string) error {
 	offset, err := ini.sectionExists(section)
-	if err != nil {
+	if err != ErrSectionNotExists {
 		return err
 	}
 
